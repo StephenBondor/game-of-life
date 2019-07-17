@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
-import qs from 'query-string';
+import {parse} from 'query-string';
 // Environment Values
 const {floor, random, sqrt} = Math;
 const {innerHeight, innerWidth, location} = window;
-const {cellcount, delay} = qs.parse(location.search);
+const {cellcount, delay} = parse(location.search);
 const size = floor(sqrt((innerHeight * innerWidth) / cellcount || 1000));
 const [rows, cols] = [floor(innerHeight / size), floor(innerWidth / size)];
 const [t, f, seed] = [true, false, Array(rows * cols).fill(0)];
