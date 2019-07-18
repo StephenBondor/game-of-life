@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 import {parse} from 'query-string';
 // Environment Values
 const {floor, random, sqrt} = Math;
@@ -8,7 +8,7 @@ const {cellcount, delay} = parse(location.search);
 const size = floor(sqrt((innerHeight * innerWidth) / cellcount || 1000));
 const [rows, cols] = [floor(innerHeight / size), floor(innerWidth / size)];
 const [t, f, seed] = [true, false, Array(rows * cols).fill(0)];
-// Styles
+// Component Styles
 const AppContainer = styled.div`
 	display: grid;
 	grid: repeat(${rows}, ${size}px) / repeat(${cols}, ${size}px);
@@ -16,34 +16,54 @@ const AppContainer = styled.div`
 const Cell = styled.div`
 	background: ${props => (props.bg ? 'black' : 'white')};
 `;
+const Button = styled.div`
+	width: 50px;
+	height: 50px;
+	border: 1px solid black;
+	border-radius: 100%;
+	border-width: 0.5px 0.5px 2px 0.5px;
+	position: fixed;
+	top: 25px;
+	left: ${innerWidth - 75}px;
+	background: white;
+	text-align: center;
+	font-weight: bolder;
+	line-height: 3.3;
+	&:active {
+		transform: translate(0, 1px);
+		border: 1px double black;
+	}
+`;
 // Game Logic
 const getNeighbors = (cells, i) => {
-	let [count, mod, cm1, bttm] = [0, i % cols, cols - 1, rows * cols - cols];
-	if (i > cols && mod !== 0 && cells[i - (cols + 1)]) count++; // upper left
-	if (i > cols && cells[i - cols]) count++; // upper center
-	if (i > cols && mod !== cm1 && cells[i - cm1]) count++; // upper right
-	if (i < bttm && mod !== cm1 && cells[i + cols + 1]) count++; // lower right
-	if (i < bttm && cells[i + cols]) count++; // lower center
-	if (i < bttm && mod !== 0 && cells[i + cm1]) count++; // lower left
+	let [count, mod, cm1, btm] = [0, i % cols, cols - 1, rows * cols - cols];
+	if (i > cm1 && mod !== 0 && cells[i - (cols + 1)]) count++; // upper left
+	if (i > cm1 && cells[i - cols]) count++; // upper center
+	if (i > cm1 && mod !== cm1 && cells[i - cm1]) count++; // upper right
+	if (i < btm && mod !== cm1 && cells[i + cols + 1]) count++; // lower right
+	if (i < btm && cells[i + cols]) count++; // lower center
+	if (i < btm && mod !== 0 && cells[i + cm1]) count++; // lower left
 	if (mod !== cm1 && cells[i + 1]) count++; // right
 	if (mod !== 0 && cells[i - 1]) count++; // left
 	return count;
 };
-const tick = prevCells =>
-	prevCells.map((state, i) => {
-		const count = getNeighbors(Array.from(prevCells), i);
-		return state ? (count < 4 ? [f, f, t, t][count] : f) : count === 3 && t;
+const tick = p =>
+	p.map((state, i) => {
+		const c = getNeighbors(Array.from(p), i);
+		return state ? (c < 4 ? [f, f, t, t][c] : f) : c === 3 && t;
 	});
 const tog = (cells, i) => cells.map((s, j) => (j === i ? !s : s));
 // User Interface
 export default () => {
 	const [cells, setCells] = useState(seed.map(() => floor(random() * 2)));
+	const [go, setGo] = useState(true);
 	useEffect(() => {
-		const id = setInterval(() => setCells(p => tick(p)), delay || 1000);
+		let id = setInterval(() => go && setCells(p => tick(p)), delay || 1000);
 		return () => clearInterval(id);
-	}, []);
+	}, [go]);
 	return (
 		<AppContainer>
+			<Button onClick={() => setGo(!go)}>{go ? '| |' : '▶'}</Button>
 			{cells.map((s, i) => (
 				<Cell key={i} bg={s} onClick={() => setCells(p => tog(p, i))} />
 			))}
