@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import styled, {css} from 'styled-components';
+import styled from 'styled-components';
 import {parse} from 'query-string';
 // Environment Values
 const {floor, random, sqrt} = Math;
@@ -31,7 +31,7 @@ const Button = styled.div`
 	line-height: 3.3;
 	&:active {
 		transform: translate(0, 1px);
-		border: 1px double black;
+		border: 1px solid black;
 	}
 `;
 // Game Logic
