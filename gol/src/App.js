@@ -8,6 +8,18 @@ const {cellcount, delay} = parse(location.search);
 const size = floor(sqrt((innerHeight * innerWidth) / cellcount || 1000));
 const [rows, cols] = [floor(innerHeight / size), floor(innerWidth / size)];
 const [t, f, seed] = [true, false, Array(rows * cols).fill(0)];
+const cNeighbors = seed.map((_, i) => {
+	let [mod, cm1, btm, t] = [i % cols, cols - 1, rows * cols - cols, []];
+	if (i > cm1 && mod !== 0) t.push(i - (cols + 1)); // upper left
+	if (i > cm1) t.push(i - cols); // upper center
+	if (i > cm1 && mod !== cm1) t.push(i - cm1); // upper right
+	if (i < btm && mod !== cm1) t.push(i + cols + 1); // lower right
+	if (i < btm) t.push(i + cols); // lower center
+	if (i < btm && mod !== 0) t.push(i + cm1); // lower left
+	if (mod !== cm1) t.push(i + 1); // right
+	if (mod !== 0) t.push(i - 1); // left
+	return t;
+});
 // Component Styles
 const AppContainer = styled.div`
 	display: grid;
@@ -35,22 +47,10 @@ const Button = styled.div`
 	}
 `;
 // Game Logic
-const getNeighbors = (cells, i) => {
-	let [count, mod, cm1, btm] = [0, i % cols, cols - 1, rows * cols - cols];
-	if (i > cm1 && mod !== 0 && cells[i - (cols + 1)]) count++; // upper left
-	if (i > cm1 && cells[i - cols]) count++; // upper center
-	if (i > cm1 && mod !== cm1 && cells[i - cm1]) count++; // upper right
-	if (i < btm && mod !== cm1 && cells[i + cols + 1]) count++; // lower right
-	if (i < btm && cells[i + cols]) count++; // lower center
-	if (i < btm && mod !== 0 && cells[i + cm1]) count++; // lower left
-	if (mod !== cm1 && cells[i + 1]) count++; // right
-	if (mod !== 0 && cells[i - 1]) count++; // left
-	return count;
-};
 const tick = p =>
 	p.map((state, i) => {
-		const c = getNeighbors(Array.from(p), i);
-		return state ? (c < 4 ? [f, f, t, t][c] : f) : c === 3 && t;
+		let c = cNeighbors[i].reduce((r, v) => r + p[v], 0); // neighbor count
+		return state ? (c < 4 ? [f, f, t, t][c] : f) : c === 3 && t; // rules
 	});
 const tog = (cells, i) => cells.map((s, j) => (j === i ? !s : s));
 // User Interface
