@@ -1,72 +1,65 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import styled from 'styled-components';
 import {parse} from 'query-string';
 // Environment Values
 const {floor, random, sqrt} = Math;
 const {innerHeight, innerWidth, location} = window;
 const {cellcount, delay} = parse(location.search);
-const size = floor(sqrt((innerHeight * innerWidth) / cellcount || 1000));
+const size = floor(sqrt((innerHeight * innerWidth) / (cellcount || 1000)));
 const [rows, cols] = [floor(innerHeight / size), floor(innerWidth / size)];
-const [t, f, seed] = [true, false, Array(rows * cols).fill(0)];
-const cNeighbors = seed.map((_, i) => {
-	let [mod, cm1, btm, t] = [i % cols, cols - 1, rows * cols - cols, []];
-	if (i > cm1 && mod !== 0) t.push(i - (cols + 1)); // upper left
-	if (i > cm1) t.push(i - cols); // upper center
-	if (i > cm1 && mod !== cm1) t.push(i - cm1); // upper right
-	if (i < btm && mod !== cm1) t.push(i + cols + 1); // lower right
-	if (i < btm) t.push(i + cols); // lower center
-	if (i < btm && mod !== 0) t.push(i + cm1); // lower left
-	if (mod !== cm1) t.push(i + 1); // right
-	if (mod !== 0) t.push(i - 1); // left
-	return t;
-});
-// Component Styles
-const AppContainer = styled.div`
-	display: grid;
-	grid: repeat(${rows}, ${size}px) / repeat(${cols}, ${size}px);
-`;
-const Cell = styled.div`
-	background: ${props => (props.bg ? 'black' : 'white')};
-`;
-const Button = styled.div`
+const [pW, pH] = [floor(innerWidth / cols), floor(innerHeight / rows)];
+const [t, f, w, h] = [true, false, pW * cols, pH * rows];
+let [ctx, cells] = [{}, [...Array(rows)].map(() => [...Array(cols)])];
+cells = cells.map(r => r.map(() => floor(random() * 2)));
+const cNeighbors = cells.map((r, i) =>
+	r.map((_, j) => {
+		let neighbors = [];
+		for (let dir = 0; dir < 9; dir++) {
+			let [n_r, n_c] = [i + ((dir % 3) - 1), j + (floor(dir / 3) - 1)];
+			if (dir !== 4 && n_r >= 0 && n_r < rows && n_c >= 0 && n_c < cols)
+				neighbors.push({x: n_r, y: n_c});
+		}
+		return neighbors;
+	})
+);
+// Styles
+const Button = styled.button`
 	width: 50px;
 	height: 50px;
-	border: 1px solid black;
-	border-radius: 100%;
-	border-width: 0.5px 0.5px 2px 0.5px;
 	position: fixed;
 	top: 25px;
 	left: ${innerWidth - 75}px;
-	background: white;
-	text-align: center;
-	font-weight: bolder;
-	line-height: 3.3;
-	&:active {
-		transform: translate(0, 1px);
-		border: 1px solid black;
-	}
 `;
+const fillCell = (x, y, fill) => {
+	ctx.fillStyle = fill ? 'black' : 'white';
+	ctx.fillRect(x * pW, y * pH, pW, pH);
+};
 // Game Logic
-const tick = p =>
-	p.map((state, i) => {
-		let c = cNeighbors[i].reduce((r, v) => r + p[v], 0); // neighbor count
-		return state ? (c < 4 ? [f, f, t, t][c] : f) : c === 3 && t; // rules
-	});
-const tog = (cells, i) => cells.map((s, j) => (j === i ? !s : s));
+const tick = () =>
+	(cells = cells.map((r, i) =>
+		r.map((state, j) => {
+			let n = cNeighbors[i][j].reduce((a, {x, y}) => a + cells[x][y], 0); // neighbor count
+			let alive = state ? (n < 4 ? [f, f, t, t][n] : f) : n === 3; // rules
+			if (alive !== state) fillCell(j, i, alive);
+			return alive;
+		})
+	));
+const tog = ({clientX, clientY}) => {
+	let [r, c] = [floor((clientY - 10) / pH), floor((clientX - 10) / pW)];
+	if (c >= 0 && r >= 0) fillCell(c, r, (cells[r][c] = !cells[r][c]));
+};
 // User Interface
 export default () => {
-	const [cells, setCells] = useState(seed.map(() => floor(random() * 2)));
-	const [go, setGo] = useState(true);
+	const [[go, setGo], cRef] = [useState(true), useRef(null)];
 	useEffect(() => {
-		let id = setInterval(() => go && setCells(p => tick(p)), delay || 1000);
+		ctx = cRef.current.getContext('2d');
+		let id = setInterval(() => go && tick(), delay || 100);
 		return () => clearInterval(id);
-	}, [go]);
+	}, [go, cRef]);
 	return (
-		<AppContainer>
+		<>
 			<Button onClick={() => setGo(!go)}>{go ? '| |' : '▶'}</Button>
-			{cells.map((s, i) => (
-				<Cell key={i} bg={s} onClick={() => setCells(p => tog(p, i))} />
-			))}
-		</AppContainer>
+			<canvas ref={cRef} width={w} height={h} onClick={e => tog(e)} />
+		</>
 	);
 };
