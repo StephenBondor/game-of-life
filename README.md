@@ -10,7 +10,7 @@ Features:
     code!
 -   Optimized with canvas. Still performant up to the maximum array length
     allowed by JS. Somewhere around a million pixels.
--   Styled with react and styled components
+-   Styled with JSS
 -   Click on each cell to toggle its value for that period
 -   Uses a URL parser to edit default setting:
     `https://jovial-shannon-5d8778.netlify.com/?cellcount=1100&delay=1200` sets
