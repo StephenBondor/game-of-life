@@ -17,7 +17,7 @@ Features:
     total cell count to `1100` and delay between ticks to `1200` ms. Defaults
     are 1000 each
 -   Deployed
-    [here](https://jovial-shannon-5d8778.netlify.com/?cellcount=1100&delay=1200)
+    [here](https://jovial-shannon-5d8778.netlify.com/?cellcount=11000&delay=100)
 
 July 25, 2019 - 65 lines!
 
