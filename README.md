@@ -2,9 +2,11 @@
 
 React version of Conway's Game of Life
 
+_WARNING: THIS CODE IS OPTIMIZED TO MINIMIZE LINES, NOT TO UNDERSTAND_
+
 Features:
 
--   Including styles and functionality (but not react boilerplate) 65 lines of
+-   Including styles and functionality (but not react boilerplate) 50 lines of
     code!
 -   Optimized with canvas. Still performant up to the maximum array length
     allowed by JS. Somewhere around a million pixels.
@@ -17,4 +19,8 @@ Features:
 -   Deployed
     [here](https://jovial-shannon-5d8778.netlify.com/?cellcount=1100&delay=1200)
 
-Aug 2nd - 55 lines!!
+July 25, 2019 - 65 lines!
+
+Aug 2nd, 2019 - 55 lines!!
+
+Aug 5th, 2019 - 50 lines!!!!!

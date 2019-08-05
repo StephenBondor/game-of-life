@@ -1,13 +1,12 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {parse} from 'query-string';
 // Environment Values and Setup Values
-const {floor: fl, random: r, sqrt} = Math;
 const {innerHeight: iH, innerWidth: iW, location} = window;
-const {cellcount, delay} = parse(location.search);
-const size = fl(sqrt((iH * iW) / (cellcount || 1000)));
-const [R, C] = [fl(iH / size), fl(iW / size)];
+const [{floor: fl, random: r, sqrt}, {delay}] = [Math, parse(location.search)];
+const size = fl(sqrt((iH * iW) / (parse(location.search).cellcount || 1000)));
+const [R, C, B, W] = [fl(iH / size), fl(iW / size), 'black', 'white'];
 const [pW, pH, bg] = [fl(iW / C), fl(iH / R), 'background'];
-let [t, f, w, h, ctx] = [true, false, pW * C, pH * R, {}];
+let [t, f, w, h, Z] = [true, false, pW * C, pH * R, {}];
 let cells = [...Array(R)].map(() => [...Array(C)].map(() => fl(r() * 2)));
 const neighbCount = cells.map((r, i) =>
 	r.map((_, j) =>
@@ -19,37 +18,33 @@ const neighbCount = cells.map((r, i) =>
 );
 // Styles
 const s1 = {position: 'fixed', top: '25px', left: `${iW - 75}px`};
-const [s, E, I] = [{...s1, width: '50px', height: '50px'}, 'red', 'green'];
-const fillCell = (x, y, fill) => {
-	ctx.fillStyle = fill ? 'black' : 'white';
-	ctx.fillRect(x * pW, y * pH, pW, pH);
-};
+const [s, D, N] = [{...s1, width: '50px', height: '50px'}, 'red', 'green'];
+const fC = (x, y, f) => [(Z.fillStyle = f ? B : W), Z.fillRect(x, y, pW, pH)];
 // Game Logic
 const tick = () =>
-	(cells = cells.map((r, i) =>
+	cells.map((r, i) =>
 		r.map((state, j) => {
 			let n = neighbCount[i][j].reduce((a, {x, y}) => a + cells[x][y], 0);
-			let alive = state ? (n < 4 ? [f, f, t, t][n] : f) : n === 3; // rules
-			if (alive !== state) fillCell(j, i, alive);
-			return alive;
+			let ns = state ? (n < 4 ? [f, f, t, t][n] : f) : n === 3; // rules
+			return ns !== state ? [fC(j * pW, i * pH, ns), ns][1] : ns;
 		})
-	));
-const tog = ({clientX, clientY}) => {
+	);
+const toggle = ({clientX, clientY}) => {
 	let [r, c] = [fl((clientY - 1) / pH), fl((clientX - 1) / pW)];
-	if (c >= 0 && r >= 0) fillCell(c, r, (cells[r][c] = !cells[r][c]));
+	if (c >= 0 && r >= 0) fC(c * pW, r * pH, (cells[r][c] = !cells[r][c]));
 };
-// User Interface
+// User Interface, State Control
 export default () => {
-	const [[g, G], cRef] = [useState(true), useRef(null)];
+	const [[go, Go], cRef] = [useState(true), useRef(null)];
 	useEffect(() => {
-		ctx = cRef.current.getContext('2d');
-		let id = setInterval(() => g && tick(), delay || 100);
+		Z = cRef.current.getContext('2d');
+		let id = setInterval(() => go && (cells = tick()), delay || 100);
 		return () => clearInterval(id);
-	}, [g, cRef]);
+	}, [go, cRef]);
 	return (
 		<>
-			<button style={{...s, [bg]: g ? E : I}} onClick={() => G(!g)} />
-			<canvas ref={cRef} width={w} height={h} onClick={e => tog(e)} />
+			<button style={{...s, [bg]: go ? D : N}} onClick={() => Go(!go)} />
+			<canvas ref={cRef} width={w} height={h} onClick={e => toggle(e)} />
 		</>
 	);
 };
