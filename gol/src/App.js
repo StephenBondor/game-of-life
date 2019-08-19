@@ -6,7 +6,7 @@ const [{floor: fl, random: r, sqrt}, {delay}] = [Math, parse(location.search)];
 const size = fl(sqrt((iH * iW) / (parse(location.search).cellcount || 1000)));
 const [R, C, B, W] = [fl(iH / size), fl(iW / size), 'black', 'white'];
 const [pW, pH, bg] = [fl(iW / C), fl(iH / R), 'background'];
-let [t, f, w, h, Z] = [true, false, pW * C, pH * R, {}];
+let [w, h, Z] = [pW * C, pH * R, {}];
 let cells = [...Array(R)].map(() => [...Array(C)].map(() => fl(r() * 2)));
 const neighbCount = cells.map((r, i) =>
 	r.map((_, j) =>
@@ -25,7 +25,7 @@ const tick = () =>
 	cells.map((r, i) =>
 		r.map((state, j) => {
 			let n = neighbCount[i][j].reduce((a, {x, y}) => a + cells[x][y], 0);
-			let ns = state ? (n < 4 ? [f, f, t, t][n] : f) : n === 3; // rules
+			let ns = state ? n < 4 && n > 1 : n === 3; // rules
 			return ns !== state ? [fC(j * pW, i * pH, ns), ns][1] : ns;
 		})
 	);
