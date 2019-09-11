@@ -6,8 +6,7 @@ _WARNING: THIS CODE IS OPTIMIZED TO MINIMIZE LINES, NOT TO UNDERSTAND_
 
 Features:
 
--   Including styles and functionality (but not react boilerplate) 50 lines of
-    code!
+-   Including styles and functionality 49 lines of code!
 -   Optimized with canvas. Still performant up to the maximum array length
     allowed by JS. Somewhere around a million pixels.
 -   Styled with JSS
@@ -24,3 +23,5 @@ July 25, 2019 - 65 lines!
 Aug 2nd, 2019 - 55 lines!!
 
 Aug 5th, 2019 - 50 lines!!!!!
+
+Sep 11th, 2019- 49 Lines!!!!!!
