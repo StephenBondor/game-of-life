@@ -33,3 +33,5 @@ Sep 21st, 2019- 30 Lines!!!!!!!!
 Sep 28th, 2019- 29 linessssssssss
 
 Sep 29th, 2019- 27 linessssssssssssssss
+
+Oct 26th, 2019- 23 linesssss!!!!!!!!!!!!!!
