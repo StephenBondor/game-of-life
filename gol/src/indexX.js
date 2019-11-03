@@ -20,5 +20,5 @@ let {createElement: č, useState: û, useEffect: ū, useRef: ü} = require('reac
 	[ß, J, I, ã] = ['50px', 'height', 'width', () => F.current.getContext`2d`],
 	[œ, s] = ['onClick', {position: 'fixed', top: ß, left: ß, [J]: ß, [I]: ß}],
 	á = g => ({[œ]: () => G(!g), style: {...s, background: g ? 'red' : 'tan'}}),
-	æ = g => [č('button', á(g)), č('canvas', {ref: F, [œ]: ł, [I]: ì, [J]: í})];
-O(č(() => (ä(), č('div', 0, ...æ(g)))), document.getElementById`root`);
+	æ = () => č('canvas', {ref: F, [œ]: ł, [I]: ì, [J]: í});
+O(č(() => (ä(), č('a', 0, [č('a', á(g)), æ()]))), document.getElementById`r`);
